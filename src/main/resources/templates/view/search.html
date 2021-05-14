@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/common_layout" th:with="activeTab='signup', title='Sign up'">
+
+
+<div layout:fragment="content">
+    <div class="py-5 text-center">
+
+        <div th:if="${result_code == 'notting.result'}">
+            <h2>
+                검색 결과가 없습니다.
+            </h2>
+        </div>
+
+        <div  th:if="${result_code != 'notting.result'}">
+            <h2>검색어가 포함된 게시글입니다.</h2>
+            <hr class="col-12 my-4"/>
+
+            <center>
+                <div style="height:auto; width:80%;">
+                    <table class="table table-hover" style="text-align: center;">
+                        <tbody>
+                        <tr class="table-light"  th:each="list:${boardList}">
+                            <td style="width: 70%"><a th:href="@{/board/detail/(id=${list.id})}" th:text="${list.title}"></a></td>
+                            <td th:text="${list.writeAt}"></td>
+                            <td th:text="${list.author}"></td>
+                            <td th:text="${list.liked}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </center>
+
+
+        </div>
+    </div>
+
+
+</div>
+
+
+</html>

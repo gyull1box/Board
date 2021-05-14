@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta charset="UTF-8" />
+
+<title th:text="${title} ?: 'My Project'">My Project</title>
+<th:block layout:fragment="css"></th:block>
+<th:block layout:fragment="script"></th:block>
+
+    <th:block th:replace="fragment/config :: configFragment" ></th:block>
+
+<body class="bg-white">
+
+    <th:block th:replace="fragment/header :: headerFragment(${activeTab})"></th:block>
+
+    <th:block th:class="bg-light" layout:fragment="content"></th:block>
+
+    <th:block th:replace="fragment/footer :: footerFragment"></th:block>
+
+</body>
+</html>

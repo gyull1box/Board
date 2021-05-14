@@ -1,0 +1,207 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="layout/common_layout"
+      th:with="activeTab='board'">
+
+<div layout:fragment="content" class="container">
+    <hr class="col-12 my-4">
+    <head>
+        <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+        <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    </head>
+
+    <center>
+    <div style="height:auto; width:80%;">
+        <table class="table table-hover" style="text-align: center;">
+            <thead>
+            <tr class="table-primary">
+                <td style="width: 70%"><a th:text="${board.title}"></a></td>
+                <td th:text="${board.writeAt}"></td>
+                <td th:text="${board.author}"></td>
+            </tr>
+            </thead>
+
+            <tbody aria-disabled="true">
+            <tr aria-disabled="true">
+                <td colspan="3">
+                    <textarea disabled readonly cols="200" rows="30">[[${board.content}]]</textarea>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+
+        <div th:if="${joa} == false">
+            <button type="button" class="btn btn-outline-info" sec:authorize="isAuthenticated()" name="noLikes" id="noLikes">
+                <span style="color:gray"><i class="far fa-thumbs-up fa-3x"></i></span>
+            </button>
+        </div>
+
+        <div th:if="${joa} == true">
+            <button type="button" name="likes" id="likes" class="btn btn-outline-info" sec:authorize="isAuthenticated()">
+                <span><i class="far fa-thumbs-up fa-3x"></i></span>
+            </button>
+        </div>
+
+        <div th:if="${member} != null">
+            <div align="right" th:if="${member.email} == ${board.author} or ${admin} != null">
+            <button class="btn btn-primary btn-sm" th:onclick="location.href='/board/modify?id=[[${board.id}]]'">수정</button>
+            <button class="btn btn-primary btn-sm" name="deleteBoard" th:id="${board.id}">삭제</button>
+            </div>
+        </div>
+
+        <hr class="col-12 my-4">
+
+        <div sec:authorize="isAuthenticated()">
+            <button class="btn btn-primary btn-sm" name="addComment" th:id="${board.id}">입력</button>
+            <textarea style="width:70%;text-align:left;" class="form-control" id="exampleTextarea" rows="3" cols="70" name="comment"></textarea>
+        </div>
+
+        <hr class="col-12 my-4">
+    </div>
+    </center>
+
+    <div style="height:auto; width:80%;" class="container">
+        <table th:each="comment:${comments}" style="text-align: center;">
+            <tr  class="table-light">
+                <th>
+                    <input style="border:none;border-right:0px; border-top:0px; boder-left:0px; boder-bottom:0px;" type="text" readonly th:value="${comment.member.email}" disabled>
+                    <input style="border:none;border-right:0px; border-top:0px; boder-left:0px; boder-bottom:0px;" type="text" readonly th:value="${comment.uptTime}" disabled>
+                    <button type="button" name="delete" class="close" data-dismiss="modal" aria-label="Close" th:id="${comment.Id}" sec:authorize="isAuthenticated()">
+                        <span aria-hidden="true" th:if="${member} == ${comment.member}">&times;</span>
+                    </button>
+                </th>
+            </tr>
+
+            <tr  class="table-light">
+                <td  colspan="2">
+                <textarea readonly disabled name="${comment.id}" rows="5" cols="50">[[${comment.content}]]</textarea>
+                </td>
+            </tr>
+
+        </table>
+        <hr class="col-12 my-4">
+
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options){
+            xhr.setRequestHeader(header, token)
+            });
+        });
+
+        function getId(id){
+            id = id.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + id + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+        $('[name=deleteBoard]').click(function(){
+            var id = getId('id');
+            deleteBoard(id);
+        })
+
+        function deleteBoard(id){
+            $.ajax({
+                 type: 'post',
+                 url: '/board/delete',
+                 data: {'id': id},
+                 dataType: 'text',
+                 success: function(result){
+                        alert(result);
+                        location.href="/board";
+                 },
+                 error:function(request,status,error){
+                    alert("code =" + request.status + "message = " + request.responseText + "error = " + error);
+                 },
+            });
+        }
+
+        $('[name=addComment]').click(function(){
+            var id = getId('id');
+            var content = $('[name=comment]').val();
+
+            if(content == ""){
+                alert("내용을 입력하세요.");
+                return;
+            }
+
+            addComment(id, content);
+        })
+
+        function addComment(id, content){
+            $.ajax({
+                 type: 'post',
+                 url: '/board/addComment',
+                 data: {'id': id, 'content':content},
+                 dataType: 'text',
+                 success: function(result){
+                        alert(result);
+                        window.location.reload(true);
+                 },
+                 error:function(request,status,error){
+                    alert("code =" + request.status + "message = " + request.responseText + "error = " + error);
+                 },
+            });
+        }
+
+
+      $('[name=delete]').click(function(){
+                var comment_id = $(this).attr("id");
+                commentDelete(comment_id);
+            })
+
+        function commentDelete(comment_id){
+            $.ajax({
+                url: '/board/deleteComment',
+                type: 'post',
+                data: {'comment_id':comment_id},
+                 success: function(result){
+                        alert(result);
+                        window.location.reload(true);
+                 },
+            });
+        }
+
+      $('[name=noLikes]').click(function(){
+            var id = getId('id');
+            addLikes(id);
+        })
+
+        function addLikes(id){
+            $.ajax({
+                url: '/board/likes',
+                type: 'post',
+                data: {'id':id},
+                success: function(result){
+                    alert(result);
+                    window.location.reload(true);
+                },
+            });
+        }
+
+        $('[name=likes]').click(function(){
+            var id = getId('id');
+            deleteLikes(id);
+        })
+
+        function deleteLikes(id){
+            $.ajax({
+                url: '/board/deleteLikes',
+                type: 'post',
+                data : {'id': id},
+                success: function(result){
+                    alert(result);
+                    window.location.reload(true);
+                },
+            });
+        }
+
+    </script>
+</div>

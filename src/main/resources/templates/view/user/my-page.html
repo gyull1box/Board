@@ -1,0 +1,63 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/common_layout" th:with="activeTab='myPage'">
+
+
+<div layout:fragment="content">
+    <hr class="col-12 my-4">
+    <center>
+        <div style="height:auto; width:80%;">
+            <div th:if="${memBoard} != null">
+                <p1>내가 올린 게시글</p1>
+                <table class="table table-hover" style="text-align: center;">
+                    <tbody>
+                    <tr class="table-active"  th:each="board:${memBoard}">
+                        <td style="width: 70%"><a th:href="@{/board/detail/(id=${board.id})}" th:text="${board.title}"></a></td>
+                        <td th:text="${board.writeAt}"></td>
+                        <td th:text="${board.author}"></td>
+                        <td th:text="${board.liked}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <hr class="col-12 my-4">
+            <div th:if="${memSellBoard} != null">
+                <p1>내가 올린 판매글</p1>
+                <table class="table table-hover" style="text-align: center;">
+                    <tbody>
+                    <tr class="table-active"  th:each="sell:${memSellBoard}">
+                        <td style="width: 70%"><a th:href="@{/shop/detail/(id=${sell.id})}" th:text="${sell.title}"></a></td>
+                        <td th:text="${sell.uptTime}"></td>
+                        <td th:text="${sell.author}"></td>
+                        <td>
+                            <span class="lead" th:text="${#numbers.formatInteger(sell.price, 3, 'COMMA')}"></span>
+                            <span class="lead"> 원</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr class="col-12 my-4">
+            <div th:if="${memJoaBoard} != null">
+                <p1>내가 좋아한 게시글</p1>
+                <table class="table table-hover" style="text-align: center;">
+                    <tbody>
+                    <tr class="table-active"  th:each="joa:${memJoaBoard}">
+                        <td style="width: 70%"><a th:href="@{/board/detail/(id=${joa.id})}" th:text="${joa.title}"></a></td>
+                        <td th:text="${joa.writeAt}"></td>
+                        <td th:text="${joa.author}"></td>
+                        <td th:text="${joa.liked}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <hr class="col-12 my-4">
+
+        </div>
+    </center>
+</div>
+</html>

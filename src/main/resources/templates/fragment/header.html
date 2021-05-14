@@ -1,0 +1,72 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<div th:fragment="headerFragment(activeTab)">
+<head>
+    <style>
+        .jumbotron_ver {
+          background-image: url('https://cdn.pixabay.com/photo/2016/04/15/04/02/water-1330252_960_720.jpg');
+          background-size: cover;
+          padding: 2rem 1rem;
+          margin-bottom: 0rem;
+          background-color: #f7f7f9;
+        }
+    </style>
+</head>
+
+    <div class="jumbotron_ver" >
+
+        <h1 class="display-3">My_pro</h1>
+        <p class="lead">문의사항이나 수정사항이 있으시면 soheej93@hanmail.net으로 연락부탁합니다.</p>
+        <hr class="my-4">
+        <p>방문해 주셔서 정말 감사합니다.</p>
+
+        <div class="alert alert-warning" role="alert" th:if="${member != null && !member.emailVerified}">
+            가입을 완료하려면 <a class="alert-link">[[${member.email}]]로 발송된 인증 이메일을 확인</a>하세요.
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" th:href="@{/}">Home</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="true" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="navbar-collapse collapse show" id="navbarColor01" style="">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item" th:class="${activeTab == 'login'}? 'active':null" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/login}">로그인</a>
+                </li>
+
+                <form class="nav-item"  th:method="post"  th:action="@{/logout}" sec:authorize="isAuthenticated()">
+                    <button  sec:authorize="isAuthenticated()" class="btn btn-primary btn-sm" type="submit"><i class="fas fa-sign-out-alt"></i></button>
+                </form>
+
+                <li class="nav-item" th:class="${activeTab == 'signup'}? 'active':null" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/signup}">회원가입</a>
+                </li>
+
+                <li class="nav-item" th:class="${activeTab == 'board'}? 'active':null">
+                    <a class="nav-link" th:href="@{/board}">자유게시판</a>
+                </li>
+
+                <li class="nav-item" th:class="${activeTab == 'shop'}? 'active':null">
+                    <a class="nav-link" th:href="@{/shop/main}">중고쇼핑</a>
+                </li>
+
+                <li class="nav-item" th:class="${activeTab == 'myPage'}? 'active':null" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/myPage}">마이페이지</a>
+                </li>
+
+            </ul>
+            <form class="form-inline my-2 my-lg-0" th:action="@{/result}" method="post" novalidate>
+                <input class="form-control mr-sm-2" type="text" placeholder="Search" id="searchContent" name="content" />
+                <button class="btn btn-secondary my-2 my-sm-0" type="submit" name="result">Search</button>
+            </form>
+        </div>
+    </nav>
+
+</div>
+</html>
+

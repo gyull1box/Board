@@ -1,0 +1,71 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/common_layout" th:with="activeTab='board'">
+
+
+<div layout:fragment="content">
+    <hr class="col-12 my-4">
+
+    <head>
+        <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+        <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    </head>
+    <div class="container">
+        <main>
+            <div class="form-group">
+                <div class="form-group">
+                    <label class="col-form-label" for="title">제목</label>
+                    <input type="text" class="form-control" placeholder="제목을 입력해주세요." id="title" name="title">
+                </div>
+                <div class="form-group">
+                    <label for="content">본문</label>
+                    <textarea class="form-control" id="content" name="content" rows="10" placeholder="내용을 입력해주세요."></textarea>
+                </div>
+            </div>
+        </main>
+                <div align="right">
+                    <button class="btn btn-primary btn-sm" id="saveBoard" name="saveBoard">등록</button>
+                </div>
+        <hr class="col-12 my-4">
+
+    </div>
+    <script>
+    $(document).ready(function(){
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function(e, xhr, options){
+        xhr.setRequestHeader(header, token)
+        });
+    });
+
+        $('[name=saveBoard]').click(function(){
+            var title = $('[name=title]').val();
+            var content = $('#content').val();
+
+            if(title == "" || content == ""){
+                alert("제목과 내용을 모두 입력해주세요");
+                return;
+            }
+
+            addBoard(title, content);
+        })
+
+        function addBoard(title, content){
+            $.ajax({
+                 type: 'post',
+                 url: '/board/write',
+                 data: {'title':title, 'content':content},
+                 dataType: 'text',
+                 success: function(result){
+                        alert(result);
+                        location.href="/board";
+                 },
+                 error:function(request,status,error){
+                    alert("code =" + request.status + "message = " + request.responseText + "error = " + error);
+                 },
+            });
+        }
+    </script>
+</div>
+</html>

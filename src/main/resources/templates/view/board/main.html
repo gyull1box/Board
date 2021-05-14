@@ -1,0 +1,54 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="layout/common_layout"
+      th:with="activeTab='board'">
+
+<div layout:fragment="content" class="container">
+    <hr class="col-12 my-4">
+
+    <center>
+    <div style="height:auto; width:80%;">
+        <div th:if="${member} == null">
+             <p3><span><a th:href="@{/login}">로그인</a></span>을 하시면 게시글을 작성할 수 있습니다.</p3>
+        </div>
+
+        <table class="table table-hover" style="text-align: center;">
+            <thead>
+            <tr class="table-primary">
+                <th scope="col" style="width: 70%" align="center">제목</th>
+                <th scope="col">작성날짜</th>
+                <th scope="col">작성자</th>
+                <th scope="col">좋아요</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr class="table-light"  th:each="list:${boards}">
+                <td style="width: 70%"><a th:href="@{/board/detail/(id=${list.id})}" th:text="${list.title}"></a></td>
+                <td th:text="${list.writeAt}"></td>
+                <td th:text="${list.author}"></td>
+                <td th:text="${list.liked}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+        <div align="center">
+            <span th:each="pageNum : ${pageList}" th:inline="text">
+                <a th:href="@{/board(page=${pageNum})}">[[${pageNum}]]</a>
+            </span>
+        </div>
+
+    </center>
+
+
+    <hr class="col-12 my-4">
+        <div align="right">
+            <button class="btn btn-primary btn-sm" sec:authorize="isAuthenticated()" onclick="location.href='/board/write'">글쓰기</button>
+        </div>
+
+    <hr class="col-12 my-4">
+
+</div>

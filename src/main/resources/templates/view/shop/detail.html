@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="layout/common_layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div layout:fragment="content" class="container">
+    <center>
+        <hr class="col-12 my-4"/>
+        <head>
+        <head>
+            <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+            <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+        </head>
+
+        <div style="height:auto; width:80%;">
+        <table class="table table-hover" style="text-align: center;">
+            <thead>
+            <tr class="table-primary">
+                <td style="width: 70%"><a th:text="${sellBoard.title}"></a></td>
+                <td th:text="${sellBoard.uptTime}"></td>
+                <td th:text="${sellBoard.author}"></td>
+            </tr>
+            </thead>
+
+            <tbody aria-disabled="true">
+            <tr aria-disabled="true">
+                <td align="center" colspan="3">
+                    <img th:src="${sellBoard.url}">
+                </td>
+            </tr>
+            <tr aria-disabled="true">
+                <td>
+                    <span class="lead" th:text="${#numbers.formatInteger(sellBoard.price, 3, 'COMMA')}"></span>
+                    <span class="lead"> 원</span>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+        </div>
+
+
+        <hr class="col-12 my-4"/>
+        <div class="row justify-content-center">
+            <div>
+                <article>
+                    <textarea disabled readonly cols="100" rows="30">[[${sellBoard.content}]]</textarea>
+                </article>
+            </div>
+
+            <hr class="col-12 my-4"/>
+        </div>
+
+            <div sec:authorize="isAuthenticated()" style="height:auto; width:80%;">
+                <button class="btn btn-primary btn-sm" name="addComment" th:id="${sellBoard.id}">입력</button>
+                <textarea style="width:70%;text-align:left;" class="form-control" id="exampleTextarea" rows="3" cols="70" name="comment"></textarea>
+            </div>
+    </center>
+
+    <div th:if="${member} != null">
+        <div align="right" th:if="${member.email} == ${sellBoard.author} or ${admin} != null">
+            <button class="btn btn-primary btn-sm" name="deleteSellBoard" th:id="${sellBoard.id}">삭제</button>
+        </div>
+    </div>
+
+    <div style="height:auto; width:80%;" class="container">
+        <table th:each="comment:${comments}" style="text-align: center;">
+            <tr  class="table-light">
+                <th>
+                    <input style="border:none;border-right:0px; border-top:0px; boder-left:0px; boder-bottom:0px;" type="text" readonly th:value="${comment.member.email}" disabled>
+                    <input style="border:none;border-right:0px; border-top:0px; boder-left:0px; boder-bottom:0px;" type="text" readonly th:value="${comment.uptTime}" disabled>
+                    <button type="button" name="delete" class="close" data-dismiss="modal" aria-label="Close" th:id="${comment.Id}" sec:authorize="isAuthenticated()">
+                        <span aria-hidden="true" th:if="${member} == ${comment.member}">&times;</span>
+                    </button>
+                </th>
+            </tr>
+
+            <tr  class="table-light">
+                <td  colspan="2">
+                    <input type="text" readonly th:value="${comment.content}" name="${comment.id}" style="border:none;border-right:0px; border-top:0px; boder-left:0px; boder-bottom:0px; fint-weight:bold;font-size:1.8em;" disabled>
+                </td>
+            </tr>
+        </table>
+        <hr class="col-12 my-4">
+
+    </div>
+
+    <script>
+
+        $(document).ready(function(){
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options){
+            xhr.setRequestHeader(header, token)
+            });
+        });
+
+        function getId(id){
+            id = id.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + id + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+        $('[name=deleteSellBoard]').click(function(){
+            var id = getId('id');
+            deleteSellBoard(id);
+        })
+
+        function deleteSellBoard(id){
+            $.ajax({
+                 type: 'post',
+                 url: '/shop/delete',
+                 data: {'id': id},
+                 dataType: 'text',
+                 success: function(result){
+                        alert(result);
+                        location.href="/shop/main";
+                 },
+                 error:function(request,status,error){
+                    alert("code =" + request.status + "message = " + request.responseText + "error = " + error);
+                 },
+            });
+        }
+
+        $('[name=addComment]').click(function(){
+            var id = getId('id');
+            var content = $('[name=comment]').val();
+
+            if(content == ""){
+                alert("내용을 입력하세요.");
+                return;
+            }
+
+            addComment(id, content);
+        })
+
+        function addComment(id, content){
+            $.ajax({
+                 type: 'post',
+                 url: '/shop/addComment',
+                 data: {'id': id, 'content':content},
+                 dataType: 'text',
+                 success: function(result){
+                        alert(result);
+                        window.location.reload(true);
+                 },
+                 error:function(request,status,error){
+                    alert("code =" + request.status + "message = " + request.responseText + "error = " + error);
+                 },
+            });
+        }
+
+
+      $('[name=delete]').click(function(){
+                var comment_id = $(this).attr("id");
+                commentDelete(comment_id);
+            })
+
+        function commentDelete(comment_id){
+            $.ajax({
+                url: '/shop/deleteComment',
+                type: 'post',
+                data: {'comment_id':comment_id},
+                 success: function(result){
+                        alert(result);
+                        window.location.reload(true);
+                 },
+            });
+        }
+
+
+    </script>
+
+
+</div>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="layout/common_layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div layout:fragment="content">
+
+    <hr class="col-12 my-4">
+    <div align="right">
+        <button class="btn btn-primary btn-sm" sec:authorize="isAuthenticated()" onclick="location.href='/shop/upload'">물품올리기</button>
+    </div>
+    <center>
+        <div style="height:auto; width:80%;">
+    <div class="row" >
+
+        <div th:if="${member} == null">
+            <p3><span><a th:href="@{/login}">로그인</a></span>을 하시면 판매글을 작성할 수 있습니다.</p3>
+        </div>
+
+        <div th:each="board:${sellBoard}" class="col-sm-2 justify-content-center">
+            <div class="card" style="width:200px">
+                <img class="card-img-top" th:src="${board.url}" alt="Card image" width="250" height="270">
+                <div class="card-body">
+                    <h4 class="card-title" th:text="${board.title}"></h4>
+                    <p class="card-text">
+                        <span th:text="${#numbers.formatInteger(board.price, 3,'COMMA')}"></span>원
+                    </p>
+                    <a th:href="@{/shop/detail/(id=${board.id})}" class="btn btn-primary stretched-link">상세 보기</a>
+                </div>
+            </div>
+        </div>
+        <hr class="col-12 my-4">
+    </div>
+
+</div>
+</center>
+</div>
+
+</html>
